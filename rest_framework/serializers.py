@@ -514,6 +514,15 @@ class Serializer(BaseSerializer):
                 attribute = field.get_attribute(instance)
             except SkipField:
                 continue
+            except AttributeError as error:
+                if not self.Meta.foreign_fields_get:
+                    raise error
+                attribute = field.get_attribute(
+                    getattr(
+                        instance,
+                        self.Meta.foreign_fields_get.get(field.field_name),
+                    )
+                )
 
             # We skip `to_representation` for `None` values so that fields do
             # not have to explicitly deal with that case.
